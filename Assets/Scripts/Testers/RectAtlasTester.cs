@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 
 using UnityEngine;
-class GlyphAtlasRectTester : PluginLoader
+class RectAtlasTester : PluginLoader
 { 
     delegate int InitTestDelegate(int testNumber); // returns passCount
     delegate int InitPassDelegate(int passIndex); // returns stepsCount;
@@ -103,24 +103,4 @@ class GlyphAtlasRectTester : PluginLoader
             yield break;
         }
 	}
-}
-
-
-[Serializable]
-public struct CppRect
-{
-    public ushort x;
-    public ushort y;
-    public ushort w;
-    public ushort h;
-
-    public CppRect(ushort xArg, ushort yArg, ushort wArg, ushort hArg)
-    {
-        x = xArg; y = yArg; w = wArg; h = hArg;
-    }
-
-    public override string ToString()
-    {
-        return $"{x} {y} {w} {h}";
-    }
 }

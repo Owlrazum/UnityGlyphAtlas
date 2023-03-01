@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 2869078393928862475}
   - component: {fileID: 2869078393928862516}
   m_Layer: 0
-  m_Name: Shelf
+  m_Name: SlotRect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -45,5 +45,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rectMats:
-    Fill: {fileID: 2100000, guid: 61f36d2ad72774fb9bc2102abb6bbacd, type: 2}
-    Stroke: {fileID: 2100000, guid: 006dc057167fa42c1964be2a3c7bb159, type: 2}
+    Fill: {fileID: 2100000, guid: 7b138054205804fe19836f7654450f71, type: 2}
+    Stroke: {fileID: 2100000, guid: f86b59153df6448d997475ce592f7af6, type: 2}
