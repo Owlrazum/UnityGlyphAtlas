@@ -38,3 +38,6 @@ sysinfo.txt
 # NativeScript plugins
 /Assets/Plugins
 /Assets/Plugins.meta
+
+# Generated textures
+/Assets/Generated
