@@ -234,7 +234,7 @@ GameObject:
   - component: {fileID: 478857865}
   - component: {fileID: 478857864}
   m_Layer: 0
-  m_Name: Main Camera (1)
+  m_Name: GlyphTestCamera
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -394,7 +394,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f58a0a1774b94dc4b6a1d7bd7c08fd7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  libPath: /Users/Abai/Desktop/Evolve/GlyphAtlas/cmake-build-debug/libGlyphAtlasLib.dylib
+  libPath: /Users/Abai/Desktop/Evolve/GlyphAtlas/cmake-build-debug/libRectAtlasTest.dylib
   texturePrefab: {fileID: 2869078393928862516, guid: 362e616fdf319454db16084e033e8d37,
     type: 3}
   glyphPrefab: {fileID: 2869078393928862516, guid: 5a76b6c4fdf264412be33a136d2b16e0,
@@ -581,7 +581,7 @@ GameObject:
   - component: {fileID: 1935950552}
   - component: {fileID: 1935950555}
   m_Layer: 0
-  m_Name: Main Camera
+  m_Name: RectTestCamera
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -697,3 +697,49 @@ MonoBehaviour:
   m_RequiresDepthTexture: 0
   m_RequiresColorTexture: 0
   m_Version: 2
+--- !u!1 &2129297645
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2129297647}
+  - component: {fileID: 2129297646}
+  m_Layer: 0
+  m_Name: CameraController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2129297646
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2129297645}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2c4dd5211a9534fc7a85fd0a4c30b707, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  glyphTestCamera: {fileID: 478857863}
+  rectTestCamera: {fileID: 1935950551}
+--- !u!4 &2129297647
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2129297645}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 6
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

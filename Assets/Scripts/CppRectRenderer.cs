@@ -87,19 +87,17 @@ public class CppRectRenderer : MonoBehaviour
             quadStripBuilder.Start(new float3x2(topLeft.c0, topRight.c0), ref buffersIndexers);
             quadStripBuilder.Continue(new float3x2(bottomLeft.c0, bottomRight.c0), ref buffersIndexers);
 
+            rectMesh.SetVertexBufferData(vertexBuffer, 0, 0, buffersIndexers.x);
+            rectMesh.SetIndexBufferData(indexBuffer, 0, 0, buffersIndexers.y);
+
             rectMesh.subMeshCount = 2;
             int2x2 subMeshIndexers = new int2x2(
                 firstSubMeshRange,
                 new int2(firstSubMeshRange.y, buffersIndexers.y - firstSubMeshRange.y)
             );
-
-            rectMesh.SetVertexBufferData(vertexBuffer, 0, 0, buffersIndexers.x);
-            rectMesh.SetIndexBufferData(indexBuffer, 0, 0, buffersIndexers.y);
-
             rectMesh.SetSubMesh(0, new SubMeshDescriptor(subMeshIndexers[0].x, subMeshIndexers[0].y));
             rectMesh.SetSubMesh(1, new SubMeshDescriptor(subMeshIndexers[1].x, subMeshIndexers[1].y));
 
-            
             rectMesh.bounds = new(new float3(size.x / 2, -size.y / 2, 0), new float3(size / 2, 0));
 
             meshFilter.mesh = rectMesh;

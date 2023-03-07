@@ -17,4 +17,20 @@ public struct CppRect
     {
         return $"{x} {y} {w} {h}";
     }
+
+    public override int GetHashCode()
+    {
+        return System.HashCode.Combine(x, y, w, h);
+    }
+
+    public override bool Equals(object obj)
+    {
+        if (obj is CppRect other)
+        {
+            return x.Equals(other.x) && y.Equals(other.y) &&
+                w.Equals(other.w) && h.Equals(other.h);
+        }
+
+        return false;
+    }
 }
