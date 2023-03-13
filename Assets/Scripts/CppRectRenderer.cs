@@ -98,7 +98,7 @@ public class CppRectRenderer : MonoBehaviour
             rectMesh.SetSubMesh(0, new SubMeshDescriptor(subMeshIndexers[0].x, subMeshIndexers[0].y));
             rectMesh.SetSubMesh(1, new SubMeshDescriptor(subMeshIndexers[1].x, subMeshIndexers[1].y));
 
-            rectMesh.bounds = new(new float3(size.x / 2, -size.y / 2, 0), new float3(size / 2, 0));
+            rectMesh.bounds = new(new float3(size.x / 2, -size.y / 2, 0), new float3(size / 2, 1));
 
             meshFilter.mesh = rectMesh;
         }
