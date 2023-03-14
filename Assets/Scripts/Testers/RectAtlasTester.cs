@@ -54,8 +54,22 @@ class RectAtlasTester : PluginLoader
     public CppRectRenderer slotPrefab;
 
     Dictionary<CppRect, GameObject> rects;
-    const float stepTime = 0.2f;
-    const float sequenceTime = 0.1f;
+    [SerializeField]
+    float stepTime = 0.01f;
+
+    [SerializeField]
+    bool shouldPauseAtNewRectAdded = false;
+
+    [SerializeField]
+    bool shouldPauseAtRectRemoval = false;
+
+    [SerializeField]
+    bool shouldPauseAtSequenceEnd = false;
+
+    [SerializeField]
+    float sequencePauseTime = 0.01f;
+
+    List<(CppRect, GameObject)> renderedTextures;
 
     protected override void Awake()
     {
@@ -82,6 +96,7 @@ class RectAtlasTester : PluginLoader
         RemovePlacedStep = GetDelegate<RemovePlacedStepDelegate>(libraryHandle, "RemovePlacedStep");
 
         rects = new Dictionary<CppRect, GameObject>(200);
+        renderedTextures = new List<(CppRect, GameObject)>(5);
         StartCoroutine(AtlasSequence(0));
     }
 
@@ -95,7 +110,7 @@ class RectAtlasTester : PluginLoader
             Debug.Log("New pass start");
 
             int updateStepsCount = InitUpdatePass(p);
-            int maxSkipsCount = 1;
+            int maxSkipsCount = 40;
             for (int s = 0; s < updateStepsCount; s += maxSkipsCount)
             {
                 int skipsCount = math.min(updateStepsCount - s, maxSkipsCount);
@@ -118,7 +133,7 @@ class RectAtlasTester : PluginLoader
         yield return StartCoroutine(GetModifiedFreeSequence());
         yield return StartCoroutine(GetPlacedGlyphSequence());
         yield return StartCoroutine(GetFreeFromBufferSequence());
-        yield return new WaitForSeconds(sequenceTime);
+        if (shouldPauseAtSequenceEnd) yield return new WaitForSeconds(sequencePauseTime);
     }
 
     IEnumerator GetPlacedGlyphSequence()
@@ -127,20 +142,35 @@ class RectAtlasTester : PluginLoader
         PreparePlacedByTextureBuffer();
         for (int t = 0; t < texturesCount; t++)
         {
-            CppRect textureRect = new CppRect(0, (ushort)(t * (512 + 50)), 512, 512);
-            Transform parent = AddRectObject(textureRect, texturePrefab, null);
-            yield return new WaitForSeconds(1);
+            Transform parent;
+            if (t == renderedTextures.Count)
+            {
+                ushort posX = (ushort)(t % 2 == 0 ? 0 : 562);
+                ushort posY = (ushort)(t / 2 * 562);
+
+                CppRect textureRect = new CppRect(posX, posY, 512, 512);
+                parent = AddRectObject(textureRect, texturePrefab, null, out bool addedNew);
+                renderedTextures.Add((textureRect, parent.gameObject));
+                if (shouldPauseAtNewRectAdded) yield return new WaitForSeconds(stepTime);
+            }
+            else
+            {
+                parent = renderedTextures[t].Item2.transform;
+            }
+
             int placedCount = GetPlacedCount(t);
             for (int glyph = 0; glyph < placedCount; glyph++)
             {
                 CppRect r = GetPlacedGlyph(t, glyph);
-                AddRectObject(r, glyphPrefab, parent);
-                Debug.Log($"Texture {t} Glyph {glyph} Rect {r}");
-                yield return new WaitForSeconds(stepTime);
+                AddRectObject(r, glyphPrefab, parent, out bool addedNew);
+                if (addedNew)
+                {
+                    if (shouldPauseAtNewRectAdded)  yield return new WaitForSeconds(stepTime);
+                }
             }
         }
 
-        yield return new WaitForSeconds(sequenceTime);
+        if (shouldPauseAtSequenceEnd) yield return new WaitForSeconds(sequencePauseTime);
     }
 
     IEnumerator RemovePlacedSequence()
@@ -150,11 +180,17 @@ class RectAtlasTester : PluginLoader
         {
             CppRect r = RemovePlacedStep();
             RemoveRenderer(r);
-            Debug.Log($"RemovedPlacedGlyphRect {r}");
-            yield return new WaitForSeconds(stepTime);
-
+            if (shouldPauseAtRectRemoval) yield return new WaitForSeconds(stepTime);
         }
-        yield return new WaitForSeconds(sequenceTime);
+
+        int texturesCount = GetTexturesCount();
+        for (int i = texturesCount; i < renderedTextures.Count; i++)
+        {
+            RemoveRenderer(renderedTextures[i].Item1);
+            renderedTextures.RemoveAt(i);
+            i--;
+        }
+        if (shouldPauseAtSequenceEnd) yield return new WaitForSeconds(sequencePauseTime);
     }
 
     IEnumerator GetModifiedFreeSequence()
@@ -164,49 +200,52 @@ class RectAtlasTester : PluginLoader
         {
             var r = GetModifiedFreeStep();
             RemoveRenderer(r);
-            Debug.Log($"RemovedModifiedFreeRect {r}");
-            yield return new WaitForSeconds(stepTime);
+            if (shouldPauseAtRectRemoval) yield return new WaitForSeconds(stepTime);
         }
-        yield return new WaitForSeconds(sequenceTime);
+        if (shouldPauseAtSequenceEnd) yield return new WaitForSeconds(sequencePauseTime);
     }
 
     IEnumerator GetFreeFromBufferSequence()
     {
         PrepareFreeByTextureBuffer();
-        int texturesCount = GetTexturesCount();
-        for (int t = 0; t < texturesCount; t++)
+        for (int t = 0; t < renderedTextures.Count; t++)
         {
-            CppRect textureRect = new CppRect(0, (ushort)(t * (512 + 50)), 512, 512);
-            Transform parent = AddRectObject(textureRect, texturePrefab, null);
+            Transform parent = renderedTextures[t].Item2.transform;
 
             int2 freeCounts = GetFreeCounts(t);
             for (int shelf = 0; shelf < freeCounts.x; shelf++)
             {
                 CppRect r = GetFreeShelfRect(t, shelf);
-                AddRectObject(r, shelfPrefab, parent);
-                Debug.Log($"Texture {t} Shelf {shelf} Rect {r}");
-                yield return new WaitForSeconds(stepTime);
+                AddRectObject(r, shelfPrefab, parent, out bool addedNew);
+                if (addedNew)
+                { 
+                    if (shouldPauseAtNewRectAdded) yield return new WaitForSeconds(stepTime);
+                }
             }
             for (int slot = 0; slot < freeCounts.y; slot++)
             {
                 CppRect r = GetFreeSlotRect(t, slot);
-                AddRectObject(r, slotPrefab, parent);
-                Debug.Log($"Texture {t} Slot {slot} Rect {r}");
-                yield return new WaitForSeconds(stepTime);
+                AddRectObject(r, slotPrefab, parent, out bool addedNew);
+                if (addedNew)
+                { 
+                    if (shouldPauseAtNewRectAdded) yield return new WaitForSeconds(stepTime);
+                }
             }
         }
 
-        yield return new WaitForSeconds(sequenceTime);
+        if (shouldPauseAtSequenceEnd) yield return new WaitForSeconds(sequencePauseTime);
     }
 
-    Transform AddRectObject(CppRect rect, CppRectRenderer prefab, Transform parent)
+    Transform AddRectObject(CppRect rect, CppRectRenderer prefab, Transform parent, out bool addedNew)
     {
         if (rects.ContainsKey(rect))
         {
+            addedNew = false;
             return rects[rect].transform;
         }
         else
         {
+            addedNew = true;
             var rend = Instantiate(prefab);
             rend.Render(rect, 1, 1);
             if (parent != null)
@@ -228,60 +267,3 @@ class RectAtlasTester : PluginLoader
         }
     }
 }
-
-/*
-removeStepsCount = InitRemoveFreeSteps();
-                for (int r = 0; r < removeStepsCount; r += maxSkipsCount)
-                {
-                    skips = math.min(removeStepsCount - r, maxSkipsCount);
-                    for (int i = 0; i < skips; i++)
-                    {
-                        CppRect removedFreeRec = RemoveFreeStep();
-                        RemoveRenderer(removedFreeRec);
-                    }
-                    // yield return new WaitForSeconds(stepTime / 2);
-                }
-
-            removeStepsCount = InitRemovePlacedSteps();
-            for (int r = 0; r < removeStepsCount; r += maxSkipsCount)
-            {
-                int skips = math.min(removeStepsCount - r, maxSkipsCount);
-                for (int i = 0; i < skips; i++)
-                {
-                    CppRect removedFreeRec = RemovePlacedStep();
-                    RemoveRenderer(removedFreeRec);
-                }
-                yield return new WaitForSeconds(stepTime / 2);
-            }
-
-            removeStepsCount = InitRemoveFreeSteps();
-            for (int r = 0; r < removeStepsCount; r += maxSkipsCount)
-            {
-                int skips = math.min(removeStepsCount - r, maxSkipsCount);
-                for (int i = 0; i < skips; i++)
-                {
-                    CppRect removedFreeRec = RemoveFreeStep();
-                    RemoveRenderer(removedFreeRec);
-                }
-                // yield return new WaitForSeconds(stepTime / 2);
-            }
-
-            for (int t = 0; t < texturesCount; t++)
-            {
-                CppRect textureRect = new CppRect(0, (ushort)(t * (512 + 50)), 512, 512);
-                Transform parent = AddRectObject(textureRect, texturePrefab, null);
-                int3 counts = GetRectsCount(t);
-                for (int shelf = 0; shelf < counts.y; shelf++)
-                {
-                    CppRect r = GetFreeShelfRect(t, shelf);
-                    AddRectObject(r, shelfPrefab, parent);
-                    // yield return new WaitForSeconds(rectStepTime);
-                }
-                for (int slot = 0; slot < counts.z; slot++)
-                {
-                    CppRect r = GetFreeSlotRect(t, slot);
-                    AddRectObject(r, slotPrefab, parent);
-                    // yield return new WaitForSeconds(rectStepTime);
-                }
-            }
-*/
