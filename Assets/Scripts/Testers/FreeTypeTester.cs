@@ -12,9 +12,10 @@ namespace FreeTypeTest
 { 
     class FreeTypeTester : PluginLoader
     {
-        unsafe delegate void RenderCharTestDelegate(GlyphData* dataPtr, char character);
+        unsafe delegate void RenderCharTestDelegate(GlyphData* dataPtr, char character, int size);
         RenderCharTestDelegate RenderCharTest;
 
+        public int size;
         public Renderer textureRenderer;
 
         protected override void Awake()
@@ -23,68 +24,30 @@ namespace FreeTypeTest
 
             RenderCharTest = GetDelegate<RenderCharTestDelegate>(libraryHandle, "RenderCharTest");
 
-            int2 dims = new int2(512, 512);
-
-            Texture2D texture = new Texture2D(dims.x, dims.y, TextureFormat.R8, false);
-            texture.filterMode = FilterMode.Point;
-
-            NativeArray<byte> textureData = new NativeArray<byte>(dims.x * dims.y, Allocator.Temp);
-            NativeArray<byte> temp = new NativeArray<byte>(0, Allocator.Temp);
-            AtomicSafetyHandle handle = NativeArrayUnsafeUtility.GetAtomicSafetyHandle(temp);
-            NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref textureData, handle);
-
-            const int gap = 10;
-            int2 pos = new int2(dims.x - 1, -1);
-            int rowMaxHeight = 0;
-            int baseLine = dims.y - 1 - gap;
-            string text = "Hello, freetype world!";
-
             GlyphData[] dataManaged = new GlyphData[1];
             unsafe
             {
                 fixed (GlyphData* dataPtr = dataManaged)
                 {
-                    for (int i = 0; i < text.Length; i++)
-                    {
-                        RenderCharTest(dataPtr, text[i]);
-                        GlyphData data = *dataPtr;
+                    RenderCharTest(dataPtr, 'Z', size);
+                    GlyphData data = *dataPtr;
 
-                        if (pos.x - data.pitch - gap < 0)
-                        {
-                            pos.x = dims.x - 1;
-                            baseLine -= rowMaxHeight + gap;
-                            rowMaxHeight = 0;
-                        }
-                        pos.x -= data.pitch + gap;
-                        pos.y = baseLine - data.rowCount;
+                    Texture2D texture = new Texture2D(data.width, data.rowCount, TextureFormat.R8, false);
+                    texture.filterMode = FilterMode.Point;
 
-                        rowMaxHeight = math.max(data.rowCount, rowMaxHeight);
-
-                        NativeArray<byte> glyphData = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<byte>(data.bitmap, data.width * data.rowCount, Allocator.None);
-                        NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref glyphData, handle);
-                        for (int y = 0; y < data.rowCount; y++)
-                        {
-                            for (int x = 0; x < data.pitch / 2; x++)
-                            {
-                                byte tempo = glyphData[y * data.pitch + x];
-                                glyphData[y * data.pitch + x] = glyphData[y * data.pitch + data.width - x - 1];
-                                glyphData[y * data.pitch + data.width - x - 1] = tempo;
-                            }
-                            NativeArray<byte>.Copy(glyphData, y * data.pitch, textureData, pos.y * dims.x + pos.x + y * dims.x, data.pitch);
-                        }
-                    }
-
+                    NativeArray<byte> textureData = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<byte>(data.bitmap, data.width * data.rowCount, Allocator.None);
+                    NativeArray<byte> temp = new NativeArray<byte>(0, Allocator.Temp);
+                    AtomicSafetyHandle handle = NativeArrayUnsafeUtility.GetAtomicSafetyHandle(temp);
+                    NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref textureData, handle);
 
                     texture.SetPixelData(textureData, 0);
 
-                    // replace with SetPixelData.
-                    // data[index + 1], data[index + 2]
+                    texture.Apply();
+                    File.WriteAllBytes($"{Application.dataPath}/Generated/temp.png", texture.EncodeToPNG());
+                    textureRenderer.material.mainTexture = texture;
+                    textureRenderer.transform.localScale = new Vector3(data.width, 1, data.rowCount);
                 }
             }
-
-            texture.Apply();
-            File.WriteAllBytes($"{Application.dataPath}/temp.png", texture.EncodeToPNG());
-            textureRenderer.material.mainTexture = texture;
         }
     }
 

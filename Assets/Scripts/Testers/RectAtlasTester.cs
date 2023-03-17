@@ -6,6 +6,7 @@ using Unity.Mathematics;
 
 using UnityEngine;
 
+// Deprecated
 class RectAtlasTester : PluginLoader
 {
     delegate int InitTestDelegate(int testNumber); // returns passCount
@@ -73,6 +74,7 @@ class RectAtlasTester : PluginLoader
 
     protected override void Awake()
     {
+        return;
         base.Awake();
 
         InitTest = GetDelegate<InitTestDelegate>(libraryHandle, "InitTest");
