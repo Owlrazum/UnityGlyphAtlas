@@ -17,6 +17,7 @@ namespace FreeTypeTest
 
         public int size;
         public Renderer textureRenderer;
+        public char character;
 
         protected override void Awake()
         {
@@ -29,7 +30,7 @@ namespace FreeTypeTest
             {
                 fixed (GlyphData* dataPtr = dataManaged)
                 {
-                    RenderCharTest(dataPtr, 'Z', size);
+                    RenderCharTest(dataPtr, character, size);
                     GlyphData data = *dataPtr;
 
                     Texture2D texture = new Texture2D(data.width, data.rowCount, TextureFormat.R8, false);
@@ -58,7 +59,5 @@ namespace FreeTypeTest
 
         public int width;
         public int rowCount;
-
-        public int pitch;
     }
 }
