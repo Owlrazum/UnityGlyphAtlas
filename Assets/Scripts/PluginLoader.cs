@@ -70,7 +70,7 @@ abstract class PluginLoader : MonoBehaviour
 	private static extern bool FreeLibrary(
 		IntPtr libraryHandle);
  
-	private static IntPtr OpenLibrary(string path)
+	protected static IntPtr OpenLibrary(string path)
 	{
 		IntPtr handle = LoadLibrary(path);
 		if (handle == IntPtr.Zero)
@@ -80,12 +80,12 @@ abstract class PluginLoader : MonoBehaviour
 		return handle;
 	}
  
-	private static void CloseLibrary(IntPtr libraryHandle)
+	protected static void CloseLibrary(IntPtr libraryHandle)
 	{
 		FreeLibrary(libraryHandle);
 	}
  
-	private static T GetDelegate<T>(
+	protected static T GetDelegate<T>(
 		IntPtr libraryHandle,
 		string functionName) where T : class
 	{
