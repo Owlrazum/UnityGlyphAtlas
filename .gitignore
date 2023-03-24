@@ -5,8 +5,9 @@
 /[Bb]uild/
 /[Bb]uilds/
 /[Ll]ogs/
+/[Uu]serSettings/
 /Assets/AssetStoreTools*
-UserSettings/*
+
 
 /.vs/
 /.vscode/

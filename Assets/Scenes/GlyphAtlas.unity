@@ -597,7 +597,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc4c894380b704464917187e42a5ab6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  libPath: F:\Abai\Evolve\GlyphAtlas\cmake-build-glyphatlas\GlyphAtlasTest.lib
+  libPath: F:\Abai\Evolve\GlyphAtlas\cmake-build-glyphatlas\Release\GlyphAtlasTest.dll
   textureViewerPrefab: {fileID: 291635589448433162, guid: a32610a9f10ab4577b05a836585f0a8a,
     type: 3}
 --- !u!1 &1835621131

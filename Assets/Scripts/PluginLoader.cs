@@ -75,7 +75,7 @@ abstract class PluginLoader : MonoBehaviour
 		IntPtr handle = LoadLibrary(path);
 		if (handle == IntPtr.Zero)
 		{
-			throw new Exception("Couldn't open native library: " + path);
+			throw new Exception($"Couldn't open native library: {path}");//\nThe error code is {Marshal.GetLastWin32Error().ToString()}"); // Error Code while loading DLL);
 		}
 		return handle;
 	}
