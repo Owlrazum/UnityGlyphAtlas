@@ -101,7 +101,7 @@ abstract class PluginLoader : MonoBehaviour
  
 #endif
 
-    public string libPath = "/Users/Abai/Desktop/Evolve/GlyphAtlas/cmake-build-debug/libGlyphAtlasLib.dylib";
+    public string libPath = ""; // path to the library compiled in GlyphAtlasCpp repo
 
     protected virtual void Awake()
     {
